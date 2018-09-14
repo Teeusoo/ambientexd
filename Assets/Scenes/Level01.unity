@@ -1853,6 +1853,12 @@ MonoBehaviour:
   playerPrefab: {fileID: 1454339900664778, guid: d0a0e677fc7cf5744a3dde7461537bd5,
     type: 2}
   timeToRespawn: 2
+  ui:
+    hud:
+      TextCoin: {fileID: 1124785387}
+      TextHeart: {fileID: 1290916401}
+      TextTimer: {fileID: 202885976}
+      HUDPanel: {fileID: 941168445}
 --- !u!4 &1426986497
 Transform:
   m_ObjectHideFlags: 0
