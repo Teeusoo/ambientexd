@@ -78,7 +78,7 @@ public class GM : MonoBehaviour
 
     public void ExitToMainMenu()
     {
-        LoadScene("MainMenu2");
+        LoadScene("MainMenu");
     }
 
     public void CloseApp()
