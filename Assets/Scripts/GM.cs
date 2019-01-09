@@ -3,54 +3,73 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GM : MonoBehaviour {
+public class GM : MonoBehaviour
+{
 
-	public static GM instance = null;
 
-	public float yMinLive = -10f;
 
-	public Transform spawnPoint;
+    public static GM instance = null;
 
-	public GameObject playerPrefab;
 
-	PlayerCtrl player;
 
-	public float timeToRespawn = 2f;
-    public float timeToKill = 1.5f;
+    public float yMinLive = -10f;
+    public Transform spawnPoint;
+
+    public GameObject playerPrefab;
 
     public float maxTime = 120f;
 
     bool timerOn = true;
+
     float timeLeft;
 
-	public UI ui;
+    public UI ui;
 
-	GameData data = new GameData();
-	
-	void Awake() {
-		if(instance == null){
-			instance = this;
-		}
-		
-	}
+    GameData data = new GameData();
 
-	void Start () {
-		if (player == null) {
-			RespawnPlayer();
-		}
+    PlayerCtrl player;
+
+    public float timeToRespawn = 2f;
+
+    public float timeToKill = 1.5f;
+
+    void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+
+    }
+
+
+
+    void Start()
+    {
+        if (player == null)
+        {
+            RespawnPlayer();
+        }
         timeLeft = maxTime;
-	}
-	
-	void Update () {
-		if(player == null) {
-			GameObject obj = GameObject.FindGameObjectWithTag("Player");
-			if(obj != null) {
-				player = obj.GetComponent<PlayerCtrl>();
-			}
-		}
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+        if (player == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag("Player");
+            if (obj != null)
+            {
+                player = obj.GetComponent<PlayerCtrl>();
+            }
+        }
         UpdateTimer();
-		DisplayHudData();		
-	}
+        DisplayHudData();
+    }
+
 
     public void RestartLevel()
     {
@@ -59,7 +78,7 @@ public class GM : MonoBehaviour {
 
     public void ExitToMainMenu()
     {
-        LoadScene("MainMenu");
+        LoadScene("MainMenu2");
     }
 
     public void CloseApp()
@@ -72,42 +91,51 @@ public class GM : MonoBehaviour {
         SceneManager.LoadScene(sceneName);
     }
 
+
+
     void UpdateTimer()
     {
-        if(timerOn)
+        if (timerOn)
         {
             timeLeft = timeLeft - Time.deltaTime;
-            if (timeLeft <= 0f) {
+            if (timeLeft <= 0f)
+            {
                 timeLeft = 0;
                 ExpirePlayer();
-                    }
-}
+            }
+        }
     }
 
-	void DisplayHudData() {
-		ui.hud.TextCoin.text = "x " + data.coinCount;
+    void DisplayHudData()
+    {
+        ui.hud.TextCoin.text = "x " + data.coinCount;
         ui.hud.TextHeart.text = "x " + data.lifeCount;
         ui.hud.TextTimer.text = "Timer: " + timeLeft.ToString("F1");
-	}
 
-	public void IncrementCoinCount() {
-		data.coinCount++;
-	}
-
-	public void RespawnPlayer() {
-		Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
-	}
+    }
+    public void IncrementCoinCount()
+    {
+        data.coinCount++;
+    }
 
     public void DecrementLives()
     {
         data.lifeCount--;
     }
 
-	public void KillPlayer(){
-		if(player != null) {
-			Destroy(player.gameObject);
+    public void RespawnPlayer()
+    {
+        Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+
+    }
+
+    public void KillPlayer()
+    {
+        if (player != null)
+        {
+            Destroy(player.gameObject);
             DecrementLives();
-            if(data.lifeCount > 0)
+            if (data.lifeCount > 0)
             {
                 Invoke("RespawnPlayer", timeToRespawn);
             }
@@ -115,24 +143,26 @@ public class GM : MonoBehaviour {
             {
                 GameOver();
             }
-			Invoke("RespawnPlayer", timeToRespawn);
-		}
-	}
+        }
+    }
+
     public void ExpirePlayer()
     {
         if (player != null)
         {
             Destroy(player.gameObject);
+
         }
         GameOver();
     }
+
     void GameOver()
     {
         timerOn = false;
         ui.gameOver.TextCoin.text = "Coins: " + data.coinCount;
         ui.gameOver.TextTimer.text = "Timer: " + timeLeft.ToString("F1");
         ui.gameOver.GameOverPanel.SetActive(true);
-            }
+    }
 
     public void LevelComplete()
     {
@@ -146,27 +176,39 @@ public class GM : MonoBehaviour {
     public void HurtPlayer()
     {
         if (player != null)
-
+        {
+            StartCoroutine(MuteMusic(true, 0f));
+            AudioManager.instance.PlayFailSound(player.gameObject);
             DisableAndPushPlayer();
-            Destroy(player.gameObject,timeToKill);
+            Destroy(player.gameObject, timeToKill);
             DecrementLives();
             if (data.lifeCount > 0)
             {
-                Invoke("RespawnPlayer",timeToKill + timeToRespawn);
+                StartCoroutine(MuteMusic(false, timeToKill + timeToRespawn));
+                Invoke("RespawnPlayer", timeToKill + timeToRespawn);
             }
             else
             {
+                StartCoroutine(MuteMusic(false, timeToKill + timeToRespawn));
                 GameOver();
             }
-            Invoke("RespawnPlayer", timeToRespawn);
         }
-    
+    }
+
+    IEnumerator MuteMusic(bool value, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Camera.main.GetComponentInChildren<AudioSource>().mute = value;
+    }
+
+
     void DisableAndPushPlayer()
     {
         player.transform.GetComponent<PlayerCtrl>().enabled = false;
-        foreach(Collider2D c2d in player.transform.GetComponents < Collider2D>())
+        foreach (Collider2D c2d in player.transform.GetComponents<Collider2D>())
         {
             c2d.enabled = false;
+
         }
         foreach (Transform child in player.transform)
         {
@@ -174,8 +216,20 @@ public class GM : MonoBehaviour {
         }
         Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
         rb.velocity = Vector2.zero;
-        rb.AddForce(new Vector2(-150.0f, 40f));
-            
+        rb.AddForce(new Vector2(-150.0f, 400f));
     }
-    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
 
