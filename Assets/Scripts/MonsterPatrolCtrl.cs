@@ -12,9 +12,13 @@ public class MonsterPatrolCtrl : MonoBehaviour
     public float waitTime = 3f;
 
     Vector3 nextPos;
+    Animator anim;
+    SpriteRenderer sr;
 
-    void Start()
-    {
+    void Start() {
+
+        anim = GetComponent<Animator>();
+        sr = GetComponent<SpriteRenderer>();
         nextPos = pos1.position;
         StartCoroutine(Move());
     }
@@ -26,12 +30,18 @@ public class MonsterPatrolCtrl : MonoBehaviour
             if (transform.position == pos1.position)
             {
                 nextPos = pos2.position;
+                anim.SetInteger("State", 1);
                 yield return new WaitForSeconds(waitTime);
+                anim.SetInteger("State", 0);
+                sr.flipX = !sr.flipX;
             }
             if (transform.position == pos2.position)
             {
                 nextPos = pos1.position;
+                anim.SetInteger("State", 1);
                 yield return new WaitForSeconds(waitTime);
+                anim.SetInteger("State", 0);
+                sr.flipX = !sr.flipX;
             }
             transform.position = Vector3.MoveTowards(transform.position, nextPos, speed * Time.deltaTime);
             yield return null;
